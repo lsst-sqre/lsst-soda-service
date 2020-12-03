@@ -1,7 +1,11 @@
-#!/user/bin/env python
+#!/usr/bin/env python
 
 import argparse
 import numpy
+from astropy.table import QTable
+from astropy.coordinates import SkyCoord
+import astropy.units as u
+
 from lsst.daf.butler import Butler, DatasetType
 
 
@@ -12,18 +16,23 @@ def main(repo, visit, detector, instrument, out_collection, ra=None, dec=None, s
     # dataset type already exists
     position_dataset_type = DatasetType('cutout_positions', dimensions=['visit', 'detector', 'instrument'],
                                         universe=butler.registry.dimensions,
-                                        storageClass='StructuredDataDict')
+                                        storageClass='AstropyQTable')
     butler.registry.registerDatasetType(position_dataset_type)
 
     if filename:
         poslist = numpy.genfromtxt(filename, dtype=None, delimiter=',')
     else:
         poslist = [(ra, dec, size), ]
-    pos = dict(ident=[i for i in range(len(poslist))],
-               ra=[float(el[0]) for el in poslist],
-               dec=[float(el[1]) for el in poslist],
-               size=[int(el[2]) for el in poslist])
-    butler.put(pos, 'cutout_positions', visit=visit, detector=detector, instrument=instrument)
+    ident = []
+    pos = []
+    size = []
+    for i, rec in enumerate(poslist):
+        pt = SkyCoord(rec[0], rec[1], frame='icrs', unit=u.deg)
+        pos.append(pt)
+        ident.append(i*u.dimensionless_unscaled)
+        size.append(rec[2]*u.dimensionless_unscaled)
+    out_table = QTable([ident, pos, size], names=['id', 'position', 'size'])
+    butler.put(out_table, 'cutout_positions', visit=visit, detector=detector, instrument=instrument)
 
 
 if __name__ == "__main__":
