@@ -61,7 +61,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
     if args.ra and args.dec and args.size and not args.filename:
         main(args.repository, args.visit, args.detector, args.instrument,
-             args.out_collection, ra=args.ra, dec=args.dec)
+             args.out_collection, ra=args.ra, dec=args.dec, size=args.size)
     elif not args.ra and not args.dec and not args.size and args.filename:
         main(args.repository, args.visit, args.detector, args.instrument,
              args.out_collection, filename=args.filename)
