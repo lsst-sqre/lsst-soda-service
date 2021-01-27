@@ -28,6 +28,6 @@ def put_values(repo, visit, detector, instrument, out_collection,
         pt = SkyCoord(rec[0], rec[1], frame='icrs', unit=u.deg)
         pos.append(pt)
         ident.append(i*u.dimensionless_unscaled)
-        size.append(rec[2]*u.dimensionless_unscaled)
+        size.append(float(rec[2])*u.dimensionless_unscaled)
     out_table = QTable([ident, pos, size], names=['id', 'position', 'size'])
     butler.put(out_table, 'cutout_positions', visit=visit, detector=detector, instrument=instrument)
